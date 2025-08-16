@@ -23,9 +23,22 @@ def create_transaction(transaction: schemas.TransactionCreate, db: Session = Dep
     return crud.create_transaction(db=db, transaction=transaction)
 
 @app.get("/transactions/", response_model=list[schemas.Transaction])
-def read_transactions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    transactions = crud.get_transactions(db, skip=skip, limit=limit)
-    return transactions
+def read_transactions(
+    skip: int = 0,
+    limit: int = 100,
+    type: str = Query(
+        None, 
+        description="Filter by transaction type", 
+        regex="^(income|expense)$"
+    ),
+    db: Session = Depends(get_db)
+):
+    return crud.get_transactions(
+        db, 
+        skip=skip, 
+        limit=limit, 
+        transaction_type=type 
+    )
 
 @app.get("/transactions/{transaction_id}", response_model=schemas.Transaction)
 def read_transaction(transaction_id: int, db: Session = Depends(get_db)):
